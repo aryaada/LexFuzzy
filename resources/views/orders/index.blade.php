@@ -28,9 +28,9 @@
                             <span
                                 class="badge
                         @if ($order->status === 'draft') bg-secondary
-                        @elseif($order->status === 'submitted') bg-warning
-                        @elseif($order->status === 'processed') bg-info
-                        @elseif($order->status === 'completed') bg-success @endif">
+                        @elseif($order->status === 'submitted') bg-warning-lt
+                        @elseif($order->status === 'processed') bg-info-lt
+                        @elseif($order->status === 'completed') bg-success-lt @endif">
                                 {{ ucfirst($order->status) }}
                             </span>
                         </td>
