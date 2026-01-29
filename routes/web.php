@@ -1,45 +1,42 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\Supplier\SupplierDashboardController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | AUTH
 |--------------------------------------------------------------------------
-*/
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+ */
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATED AREA
 |--------------------------------------------------------------------------
-*/
+ */
 Route::middleware('auth')->group(function () {
 
     // ======================
     // DASHBOARD UMUM
     // ======================
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/', [SupplierDashboardController::class, 'dashboard'])
+        ->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
     | CUSTOMER (TOKO PEMESAN)
     |--------------------------------------------------------------------------
-    */
+     */
     Route::middleware('role:customer_admin,customer_staff')->group(function () {
 
         // ORDER (CUSTOMER)
@@ -58,7 +55,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | SUPPLIER (TOKO PUSAT)
     |--------------------------------------------------------------------------
-    */
+     */
     Route::middleware('role:supplier_admin,supplier_staff')->prefix('supplier')->name('supplier.')->group(function () {
 
         // DASHBOARD
@@ -76,5 +73,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/shipments/{order}/process', [ShipmentController::class, 'process'])
             ->name('shipments.process');
     });
+
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
 
 });
