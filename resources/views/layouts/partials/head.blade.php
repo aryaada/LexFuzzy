@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>HR System</title>
+<title>Lex Fuzzy</title>
 <link rel="icon" type="image/png" href="{{ asset('assets/images/logo_hr.png') }}">
 <link href="{{ asset('assets/dist/css/tabler.min.css?1738096685') }}" rel="stylesheet" />
 <link href="{{ asset('assets/dist/css/tabler-flags.min.css?1738096685') }}" rel="stylesheet" />
