@@ -23,7 +23,18 @@ class SupplierDashboardController extends Controller
     public function orders()
     {
         $orders = Order::with(['store', 'shipment'])
-            ->latest()
+            ->leftJoin('shipments', 'shipments.order_id', '=', 'orders.id')
+            ->select('orders.*')
+            ->orderByRaw("
+            CASE shipments.delivery_decision
+                WHEN 'Cepat' THEN 1
+                WHEN 'Normal' THEN 2
+                WHEN 'Lambat' THEN 3
+                ELSE 4
+            END
+        ")
+            ->orderByDesc('shipments.fuzzy_score')
+            ->orderBy('orders.created_at')
             ->get();
 
         return view('supplier.orders', compact('orders'));
