@@ -27,14 +27,14 @@
                             <th>Kota</th>
                             <th class="text-center">Status Order</th>
                             <th class="text-center">Keputusan</th>
-                            <th class="text-center">Fuzzy Score</th>
+                            <th class="text-center">Fuzzy</th>
+                            <th class="text-center">Ongkir</th>
                             <th width="120" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($orders as $order)
                             @php
-                                // STATUS ORDER
                                 $statusColor = match ($order->status) {
                                     'draft' => 'secondary',
                                     'submitted' => 'warning',
@@ -43,7 +43,6 @@
                                     default => 'secondary',
                                 };
 
-                                // FUZZY DECISION
                                 $decision = $order->shipment->delivery_decision ?? null;
                                 $decisionColor = match ($decision) {
                                     'Cepat' => 'success',
@@ -60,14 +59,14 @@
                                 <td>{{ $order->store->store_name }}</td>
                                 <td>{{ $order->store->city }}</td>
 
-                                {{-- STATUS ORDER --}}
+                                {{-- STATUS --}}
                                 <td class="text-center">
                                     <span class="badge bg-{{ $statusColor }}-lt">
                                         {{ ucfirst($order->status) }}
                                     </span>
                                 </td>
 
-                                {{-- KEPUTUSAN FUZZY --}}
+                                {{-- FUZZY DECISION --}}
                                 <td class="text-center">
                                     @if ($decision)
                                         <span class="badge bg-{{ $decisionColor }}-lt">
@@ -85,6 +84,11 @@
                                     {{ $order->shipment->fuzzy_score ?? '-' }}
                                 </td>
 
+                                {{-- ONGKIR --}}
+                                <td class="text-center">
+                                    {{ $order->shipment ? 'Rp ' . number_format($order->shipment->shipping_cost) : '-' }}
+                                </td>
+
                                 {{-- AKSI --}}
                                 <td class="text-center">
                                     <a href="{{ route('supplier.orders.show', $order->id) }}"
@@ -95,7 +99,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-folder-x fs-4 d-block mb-1"></i>
                                     Belum ada order masuk
                                 </td>

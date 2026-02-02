@@ -31,7 +31,7 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'komerce' => [
+    'komerce_rajaongkir' => [
         'url' => env('KOMERCE_BASE_URL'),
         'key' => env('KOMERCE_TOKEN'),
     ],

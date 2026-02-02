@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\StoreProfileController;
 use App\Http\Controllers\Supplier\SupplierDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +51,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/orders/items/{item}', [OrderController::class, 'removeItem'])->name('orders.items.remove');
 
         Route::post('/orders/{order}/checkout', [OrderController::class, 'checkout'])->name('orders.checkout');
+        Route::post('/orders/{id}/preview', [OrderController::class, 'previewCheckout'])
+            ->name('orders.previewCheckout');
+
+        Route::post('/orders/{id}/final-checkout', [OrderController::class, 'finalCheckout'])
+            ->name('orders.finalCheckout');
+
     });
 
     /*
@@ -72,7 +80,23 @@ Route::middleware('auth')->group(function () {
         // SHIPMENT + FUZZY
         Route::post('/shipments/{order}/process', [ShipmentController::class, 'process'])
             ->name('shipments.process');
+
     });
+    Route::post(
+        '/supplier/shipments/{order}/ship',
+        [ShipmentController::class, 'ship']
+    )->name('supplier.shipments.ship');
+
+    Route::get('/store/profile', [StoreProfileController::class, 'edit'])
+        ->name('store.profile.edit');
+
+    Route::post('/store/profile', [StoreProfileController::class, 'update'])
+        ->name('store.profile.update');
+
+    Route::get('/locations/provinces', [LocationController::class, 'provinces']);
+    Route::get('/locations/cities/{province}', [LocationController::class, 'cities']);
+    Route::get('/locations/districts/{city}', [LocationController::class, 'districts']);
+    Route::get('/locations/subdistricts/{district}', [LocationController::class, 'subdistricts']);
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');

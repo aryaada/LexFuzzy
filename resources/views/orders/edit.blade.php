@@ -92,30 +92,63 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="row align-items-center">
+
                     <div class="col-md-6 mb-3 mb-md-0">
-                        <h5 class="mb-0">
+                        <h5 class="mb-1">
                             Total Berat :
                             <span class="text-primary fw-bold">
                                 {{ $order->total_weight }} kg
                             </span>
                         </h5>
+
+                        @if ($order->shipment)
+                            <div class="text-muted small">
+                                Jarak : {{ number_format($order->shipment->distance_km, 2) }} KM<br>
+                                Ongkir : <strong>Rp {{ number_format($order->shipment->shipping_cost) }}</strong>
+                            </div>
+                        @endif
                     </div>
 
-                    <div class="col-md-6">
-                        <form method="POST" action="{{ route('orders.checkout', $order->id) }}">
+                    <div class="col-md-6 text-end">
+                        @if (session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
+
+                        <hr>
+
+                        {{-- PREVIEW ONGKIR --}}
+                        <form method="POST" action="{{ route('orders.previewCheckout', $order->id) }}">
                             @csrf
-                            <div class="input-group">
-                                <span class="input-group-text">Jarak (KM)</span>
-                                <input type="number" step="0.1" name="distance_km" class="form-control" required>
-                                <button class="btn btn-primary">
-                                    <i class="bi bi-cart-check me-1"></i> Checkout
-                                </button>
-                            </div>
+                            <button class="btn btn-outline-primary">
+                                Hitung Ongkir & Jarak
+                            </button>
                         </form>
+
+                        {{-- TAMPILKAN HASIL --}}
+                        @if ($order->shipment)
+                            <div class="mt-3">
+                                <strong>Jarak:</strong> {{ $order->shipment->distance_km }} KM <br>
+                                <strong>Ongkir:</strong> Rp {{ number_format($order->shipment->shipping_cost) }}
+                            </div>
+
+                            <form method="POST" action="{{ route('orders.finalCheckout', $order->id) }}" class="mt-2">
+                                @csrf
+                                <button class="btn btn-success">
+                                    Checkout
+                                </button>
+                            </form>
+                        @endif
+
                     </div>
+
                 </div>
             </div>
         </div>
+
 
     </div>
 @endsection

@@ -10,7 +10,9 @@
                     Detail Order
                     <span class="text-primary">{{ $order->order_code }}</span>
                 </h4>
-                <small class="text-muted">Informasi lengkap pesanan & pengiriman</small>
+                <small class="text-muted">
+                    Informasi lengkap pesanan & pengiriman
+                </small>
             </div>
         </div>
 
@@ -65,7 +67,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($order->items as $item)
+                        @foreach ($order->items as $item)
                             <tr>
                                 <td class="fw-medium">{{ $item->sparepart->name }}</td>
                                 <td class="text-center">
@@ -77,14 +79,7 @@
                                     {{ $item->total_weight }}
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox fs-4 d-block mb-1"></i>
-                                    Tidak ada item dalam order
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -92,40 +87,55 @@
 
         {{-- SUMMARY --}}
         <div class="row mb-4">
-            <div class="col-md-6 mb-3 mb-md-0">
+            <div class="col-md-4 mb-3 mb-md-0">
                 <div class="card shadow-sm border-0 h-100 text-center">
                     <div class="card-body">
-                        <div class="fs-3 text-primary mb-1">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
+                        <i class="bi bi-box-seam fs-3 text-primary mb-1"></i>
                         <small class="text-muted">Total Berat</small>
                         <h4 class="fw-bold mb-0">
-                            {{ $order->total_weight }} kg
+                            {{ number_format($order->total_weight, 2) }} kg
                         </h4>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4 mb-3 mb-md-0">
                 <div class="card shadow-sm border-0 h-100 text-center">
                     <div class="card-body">
-                        <div class="fs-3 text-success mb-1">
-                            <i class="bi bi-signpost-2"></i>
-                        </div>
-                        <small class="text-muted">Jarak Pengiriman</small>
+                        <i class="bi bi-signpost-2 fs-3 text-success mb-1"></i>
+                        <small class="text-muted">Jarak</small>
                         <h4 class="fw-bold mb-0">
-                            {{ $order->shipment->distance_km }} km
+                            {{ $order->shipment ? number_format($order->shipment->distance_km, 2) . ' km' : '-' }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-cash-coin fs-3 text-warning mb-1"></i>
+                        <small class="text-muted">Ongkir</small>
+                        <h4 class="fw-bold mb-0">
+                            {{ $order->shipment ? 'Rp ' . number_format($order->shipment->shipping_cost) : '-' }}
                         </h4>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- FUZZY --}}
+        {{-- FUZZY / SHIPMENT ACTION --}}
         <div class="card shadow-sm border-0">
             <div class="card-body text-center">
 
-                @if (!$order->shipment->fuzzy_score)
+                {{-- BELUM ADA SHIPMENT --}}
+                @if (!$order->shipment)
+                    <div class="alert alert-warning mb-0">
+                        Ongkir & jarak belum dihitung.
+                    </div>
+
+                    {{-- BELUM DIPROSES FUZZY --}}
+                @elseif (!$order->shipment->fuzzy_score)
                     <form action="{{ route('supplier.shipments.process', $order->id) }}" method="POST">
                         @csrf
                         <button class="btn btn-success btn-lg px-4">
@@ -133,26 +143,33 @@
                             Proses Pengiriman (Fuzzy Sugeno)
                         </button>
                     </form>
-                @else
-                    <div class="alert alert-info text-start mb-0">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-check-circle fs-4 me-3"></i>
-                            <div>
-                                <p class="mb-1">
-                                    <strong>Fuzzy Score:</strong>
-                                    {{ $order->shipment->fuzzy_score }}
-                                </p>
-                                <p class="mb-0">
-                                    <strong>Keputusan:</strong>
-                                    {{ $order->shipment->delivery_decision }}
-                                </p>
-                            </div>
-                        </div>
+
+                    {{-- SUDAH FUZZY, BELUM DIKIRIM --}}
+                @elseif ($order->status === 'processed')
+                    <div class="alert alert-info mb-3">
+                        <strong>Fuzzy Score:</strong> {{ $order->shipment->fuzzy_score }} <br>
+                        <strong>Keputusan:</strong> {{ $order->shipment->delivery_decision }}
+                    </div>
+
+                    <form action="{{ route('supplier.shipments.ship', $order->id) }}" method="POST">
+                        @csrf
+                        <button class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-truck me-1"></i>
+                            Kirim Barang
+                        </button>
+                    </form>
+
+                    {{-- SUDAH DIKIRIM --}}
+                @elseif ($order->status === 'shipped')
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-truck"></i>
+                        Barang sedang dalam pengiriman
                     </div>
                 @endif
 
             </div>
         </div>
+
 
     </div>
 @endsection
